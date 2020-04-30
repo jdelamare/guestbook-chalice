@@ -1,0 +1,40 @@
+{
+  "Outputs": {
+    "GuestbookTableName": {
+      "Value": {
+        "Ref": "GuestbookTable"
+      }
+    }
+  },
+  "Resources": {
+    "GuestbookTable": {
+      "Properties": {
+        "KeySchema": [
+          {
+            "AttributeName": "email",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "date",
+            "KeyType": "RANGE"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "email",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "date",
+            "AttributeType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 1,
+          "WriteCapacityUnits": 1
+        }
+      },
+       "Type": "AWS::DynamoDB::Table"
+    }
+  } 
+}

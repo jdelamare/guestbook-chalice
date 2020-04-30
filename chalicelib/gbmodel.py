@@ -1,49 +1,38 @@
 from datetime import date
 from .Model import Model
-#import boto3
+import boto3
+import json
 
 
+# modeled my model after the example, resource is passed in as a parameter, 
 class model(Model):
-    def __init__(self):
-        self.guestentries = []
-        # self.resource = boto3.resource("dynamodb", region_name="us-east-1")
-        # self.table = self.resource.Table('guestbook')
-        # try:
-        #     self.table.load()
-        # except:
-        #     self.resource.create_table(
-        #         TableName="guestbook",
-        #         KeySchema=[
-        #             {   
-        #                 "AttributeName": "email",
-        #                 "KeyType": "HASH"
-        #             },  
-        #             {   
-        #                 "AttributeName": "date",
-        #                 "KeyType": "RANGE"
-        #             }   
-        #         ],  
-        #         AttributeDefinitions=[
-        #             {   
-        #                 "AttributeName": "email",
-        #                 "AttributeType": "S" 
-        #             },  
-        #             {   
-        #                 "AttributeName": "date",
-        #                 "AttributeType": "S"
-        #             }
-        #         ],
-        #         ProvisionedThroughput={
-        #             "ReadCapacityUnits": 1,
-        #             "WriteCapacityUnits": 1
-        #         }
-        #     )
+    def __init__(self, table_resource):
+        self._table = table_resource
 
     def select(self):
-        return self.guestentries
+        try: 
+            ddb_entries = self._table.scan()
+            print("in model: ", end='')
+            print(ddb_entries)
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Origin': "*" # gross
+                },
+                'body': json.dumps(ddb_entries['Items'])
+            }
+        except Exception as ex:
+            print(ex)
+            return {
+                'statusCode': 500,
+                'headers': {
+                    "Access-Control-Allow-Origin": "*"
+                },
+                'body': "It's not you, it's us. :("
+            }
+
 
     def insert(self, name, email, message):
         params = [name, email, date.today(), message]
-        print("here2")
         self.guestentries.append(params)
         return True
