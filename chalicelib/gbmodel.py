@@ -12,7 +12,8 @@ class model(Model):
     def select(self):
         try: 
             ddb_entries = self._table.scan()
-            ddb_entries = ddb_entries['Items'] # items contains a list of dictionaries representing each item
+            # Items contains a list of dictionaries representing each item
+            ddb_entries = ddb_entries['Items'] 
             print("ddb_entries: ", ddb_entries)
             # TODO: strange case when list is empty
             # hacky, but the string is just '[]', 
@@ -22,23 +23,9 @@ class model(Model):
 
         except Exception as ex:
             print("There's been an error, need to fix this:\n", ex)
-            return {
-                'statusCode': 500,
-                'headers': {
-                    "Access-Control-Allow-Origin": "*"
-                },
-                'body': "It's not you, it's us. :("
-            }
+            return "It's not you, it's us. :("
 
     def insert(self, name, email, message):
-        if name is None or email is None or message is None:
-            return {
-                'statusCode': 400,
-                'headers': {
-                    "Access-Control-Allow-Origin": "*"
-                },
-                'body': "Missing parameters"
-            }
         try:  
             self._table.put_item(
                 Item={
@@ -50,12 +37,5 @@ class model(Model):
             )
             return None
         except Exception as ex:
-            print("There's been an error, need to fix this")
-            print(ex)
-            return {
-                'statusCode': 500,
-                'headers': {
-                    "Access-Control-Allow-Origin": "*"
-                },
-                'body': "It's not you, it's us. :("
-            }
+            print("There's been an error, need to fix this:\n", ex)
+            return "It's not you, it's us. :("

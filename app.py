@@ -1,4 +1,5 @@
 from chalice import Chalice, Response
+from chalice import BadRequestError, ChaliceViewError
 from chalicelib import gbmodel
 import boto3
 import jinja2
@@ -12,6 +13,11 @@ _GUESTBOOK_DB = None
 
 # provides model
 def get_guestbook_db():
+    """
+    Args:
+
+    Returns:
+    """
     global _GUESTBOOK_DB
     if _GUESTBOOK_DB is None:
         _GUESTBOOK_DB = gbmodel.model(
@@ -19,8 +25,8 @@ def get_guestbook_db():
                 os.environ['GUESTBOOK_TABLE_NAME'])) # so the resources file must be run by now...
     return _GUESTBOOK_DB
 
+# get the DynamoDB model and select all of the entries from that model
 def get_context():
-    # get the DynamoDB model and select all of the entries from that model
     model = get_guestbook_db()
     entries = model.select()
     context = {
@@ -39,27 +45,34 @@ def render(tpl_path, context):
 
 @app.route('/', methods=['GET'])
 def index():
-    template = render("chalicelib/templates/index.html", get_context())
+    try:
+        template = render("chalicelib/templates/index.html", get_context())
+    except:
+        raise ChaliceViewError("Error rendering the template")
+
     return Response(template, status_code=200, headers={"Content-Type": "text/html"})
     
-# TODO this is incomplete
-#@app.lambda_function()
-#def sign_guestbook(event, context):
-#    email = event['email'][0]
-#    name = event['name'][0]
-#    msg = event['message'][0]
-#
-    # add the message to dynamodb
-
-# is truthy, will say if insert was successful
 @app.route('/sign', methods=['POST'], content_types=["application/x-www-form-urlencoded"])
 def sign():
-    post_json = urllib.parse.parse_qs(app.current_request.__dict__.get("_body")) # source below
-    email = (post_json[b'email'][0]).decode('UTF-8')
-    name = (post_json[b'name'][0]).decode('UTF-8')
-    msg = (post_json[b'message'][0]).decode('UTF-8')
-    get_guestbook_db().insert(name, email, msg) # TODO: if this fails, need to return 400
-    template = render("chalicelib/templates/index.html", get_context())
+    # Grab the passed form parameters from the `_body`. code snippet source below
+    post_json = urllib.parse.parse_qs(app.current_request.__dict__.get("_body")) 
+    try:
+        email = (post_json[b'email'][0]).decode('UTF-8')
+        name = (post_json[b'name'][0]).decode('UTF-8')
+        msg = (post_json[b'message'][0]).decode('UTF-8')
+    except:
+        raise BadRequestError("Missing parameters")
+
+    # `insert` returns None if successful, json HTTP headers if not
+    insert_status = get_guestbook_db().insert(name, email, msg) 
+    if not successful_insertion:
+        raise ChaliceViewError("Database insertion was unsuccessful")
+
+    try:
+        template = render("chalicelib/templates/index.html", get_context())
+    except:
+        raise ChaliceViewError("Error rendering the template")
+
     return Response(template, 
                     status_code=302, 
                     headers={"Content-Type": "text/html",
