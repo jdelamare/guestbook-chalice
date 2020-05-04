@@ -1,8 +1,11 @@
+# see subclass for more specific Docstrings
+
 class Model():
     def select(self):
         """
         Gets all entries from the database
-        :return: Tuple containing all rows of database
+        :return: list of dicts
+        :raises: generic exception
         """
         pass
 
@@ -12,7 +15,7 @@ class Model():
         :param name: String
         :param email: String
         :param message: String
-        :return: none
+        :return: none, or string if failed
         :raises: Database errors on connection and insertion
         """
         pass
