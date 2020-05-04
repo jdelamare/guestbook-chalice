@@ -7,7 +7,7 @@ from botocore import xform_name
 
 # need to create a custom session
 def record_as_env_var(stack_name, stage):
-    session = boto3.Session(profile_name='vocareum')
+    session = boto3.Session()#profile_name='vocareum')
     cloudformation = session.client('cloudformation')
     response = cloudformation.describe_stacks(
         StackName=stack_name

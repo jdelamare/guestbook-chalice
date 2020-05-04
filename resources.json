@@ -21,11 +21,19 @@
         ],
         "AttributeDefinitions": [
           {
+            "AttributeName": "name",
+            "AttributeType": "S"
+          },
+          {
             "AttributeName": "email",
             "AttributeType": "S"
           },
           {
             "AttributeName": "date",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "message",
             "AttributeType": "S"
           }
         ],
