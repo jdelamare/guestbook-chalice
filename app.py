@@ -98,15 +98,18 @@ def sign():
     # Grab the passed form parameters from the `_body`. code snippet source below
     post_json = urllib.parse.parse_qs(app.current_request.__dict__.get("_body")) 
     try:
-        email = (post_json[b'email'][0]).decode('UTF-8')
-        name = (post_json[b'name'][0]).decode('UTF-8')
-        msg = (post_json[b'message'][0]).decode('UTF-8')
-    except:
-        raise BadRequestError("Missing parameters")
+# local
+#        email = (post_json[b'email'][0]).decode('UTF-8')
+#        name = (post_json[b'name'][0]).decode('UTF-8')
+#        msg = (post_json[b'message'][0]).decode('UTF-8')
+        email = post_json['email'][0]
+        name = post_json['name'][0]
+        msg = post_json['message'][0]
+    except BadRequestError as e:
+        raise BadRequestError("Missing parameters here", e)
 
     # `insert` returns None if successful, json HTTP headers if not
     insert_status = get_guestbook_db().insert(name, email, msg) 
-    print("insert_status: ", insert_status)
     if insert_status:
         raise ChaliceViewError("Database insertion was unsuccessful")
 
@@ -115,11 +118,18 @@ def sign():
     except:
         raise ChaliceViewError("Error rendering the template")
 
-    return Response(template, 
+
+#    return Response(template, status_code=200, headers={"Content-Type": "text/html"})
+    return Response(template,
                     status_code=302, 
                     headers={"Content-Type": "text/html",
-                             "Location": "/"})
+                             "Location": "/ddb"}) # needed to change this for deployed
 
+
+@app.route("/test")
+def test():
+    template = render("chalicelib/templates/test.html", {})
+    return Response(template, status_code=200, headers={"Content-Type": "text/html"})
 # Resources
 # https://medium.com/richcontext-engineering/creating-a-serverless-blog-with-chalice-bdc39b835f75
 # https://chalice-workshop.readthedocs.io/en/latest/media-query/03-add-db.html
