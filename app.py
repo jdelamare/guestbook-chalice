@@ -118,9 +118,3 @@ def sign():
                     status_code=302, 
                     headers={"Content-Type": "text/html",
                              "Location": "/ddb"})
-
-
-@app.route("/test")
-def test():
-    template = render("chalicelib/templates/test.html", {})
-    return Response(template, status_code=200, headers={"Content-Type": "text/html"})
