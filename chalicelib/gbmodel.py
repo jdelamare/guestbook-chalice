@@ -1,49 +1,64 @@
 from datetime import date
 from .Model import Model
-#import boto3
-
+import boto3
+import json
+from datetime import datetime
 
 class model(Model):
-    def __init__(self):
-        self.guestentries = []
-        # self.resource = boto3.resource("dynamodb", region_name="us-east-1")
-        # self.table = self.resource.Table('guestbook')
-        # try:
-        #     self.table.load()
-        # except:
-        #     self.resource.create_table(
-        #         TableName="guestbook",
-        #         KeySchema=[
-        #             {   
-        #                 "AttributeName": "email",
-        #                 "KeyType": "HASH"
-        #             },  
-        #             {   
-        #                 "AttributeName": "date",
-        #                 "KeyType": "RANGE"
-        #             }   
-        #         ],  
-        #         AttributeDefinitions=[
-        #             {   
-        #                 "AttributeName": "email",
-        #                 "AttributeType": "S" 
-        #             },  
-        #             {   
-        #                 "AttributeName": "date",
-        #                 "AttributeType": "S"
-        #             }
-        #         ],
-        #         ProvisionedThroughput={
-        #             "ReadCapacityUnits": 1,
-        #             "WriteCapacityUnits": 1
-        #         }
-        #     )
+    """ Represent the model as DynamoDB table.
+
+    Attributes:
+        _table: A handle to the DynamoDB table, documentation exists at Boto 3
+    """
+    def __init__(self, table_resource):
+        self._table = table_resource
 
     def select(self):
-        return self.guestentries
+        """ Retrieves all of the entries from the table.
+        
+        Returns:
+            ddb_entries['Items']: A list of dictionaries, each dictionary represents an item. 
+            String literal: If this is sent then there's been an error.
+
+        Raises:
+            A generic exception, prints to STDOUT and returns the string.
+        """
+        try: 
+            ddb_entries = self._table.scan()
+
+            # Items contains a list of dictionaries representing each item
+            return ddb_entries['Items'] 
+
+        except Exception as ex:
+            print("There's been an error, need to fix this:\n", ex)
+            return "It's not you, it's us. :("
 
     def insert(self, name, email, message):
-        params = [name, email, date.today(), message]
-        print("here2")
-        self.guestentries.append(params)
-        return True
+        """ Inserts the params into the database.
+        Args: 
+            name (String): A simple field in the table.
+            email (String): A simple field in the table.
+            message (String): A simple field in the table.
+
+        Returns:
+            None: If the insertion was successful.
+            String literal: If the insertion failed, possibly due to lack of credentials.
+
+        Raises:
+            A generic exception, prints to STDOUT and returns the string.
+        """
+        try:  
+            self._table.put_item(
+                Item={
+                    'name': name,
+                    'email': email,
+                    'date': str(datetime.today()),
+                    'message': message
+                }
+            )
+
+            return None
+
+        except Exception as ex:
+            print("There's been an error, need to fix this:\n", ex)
+            return "It's not you, it's us. :("
