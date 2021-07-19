@@ -3,7 +3,7 @@
 This app is a quick look at what is needed to connect a DynamoDB database to 
 the guestbook app. Assuming progressive overload (you've been working up), this
 will be the second of the three versions of Guestbook written with chalice. 
-Only two routes are provided, so be sure to delete you DynamoDB database in the
+Only two routes are provided, so be sure to delete your DynamoDB database in the
 AWS console, as that's not provided by `chalice delete`.
 
 ## Resources
@@ -47,6 +47,13 @@ are in place, here's the steps to deploy the app:
 2) `source .venv/bin/activate`
 3) `pip install -r requirements.txt`
 4) `aws cloudformation deploy --template-file resources.json --stack-name guestbook`
+
+TODO: Get DynamoDB table name and add it to the file
+```
+aws cloudformation describe-stacks \
+    --stack-name guestbook-brian --query 'Stacks[].Outputs'
+```
+
 5) `python3 recordresources.py --stack-name guestbook`
 6) `chalice deploy`
 

@@ -19,7 +19,7 @@ def get_guestbook_db():
     """
     global _GUESTBOOK_DB
 
-    # if the guestbook database and table does not exist one is created
+    # if the handle doesn't exist, instantiate a table resource object
     if _GUESTBOOK_DB is None:
         _GUESTBOOK_DB = gbmodel.model(
             boto3.resource('dynamodb').Table(
